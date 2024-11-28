@@ -1,0 +1,24 @@
+FROM debian:bullseye
+
+ARG DB_USER
+ARG DB_NAME
+ARG DB_PWD
+
+ENV dbuser=${DB_USER}
+ENV dbname=${DB_NAME}
+ENV dbpwd=${DB_PWD}
+
+RUN apt-get update -y && \
+    apt-get install -y mariadb-server nano && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /run/mysqld && \
+    chown mysql:mysql /run/mysqld
+
+RUN sed -i 's/^bind-address\s*=.*/bind-address = 0.0.0.0/' /etc/mysql/mariadb.conf.d/50-server.cnf
+
+COPY mariadb.sh /mariadb.sh
+RUN chmod 644 /mariadb.sh
+
+EXPOSE 3306
+
+ENTRYPOINT ["bash", "/mariadb.sh"]

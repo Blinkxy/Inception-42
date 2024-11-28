@@ -1,0 +1,11 @@
+FROM debian:bullseye
+
+RUN apt-get install && apt-get update -y && \
+apt install php-fpm php-mysql -y && \
+apt install curl -y && apt-get install nano -y
+
+COPY ./wp-config.php /var/www/html/
+
+RUN chown -R www-data:www-data /var/www/html
+
+CMD ["apache2-foreground"]
