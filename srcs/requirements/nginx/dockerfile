@@ -1,8 +1,20 @@
-FROM debian:bullseye
+FROM debian:stable
+
 RUN apt-get install && apt-get update -y &&  apt-get install -y nginx && apt-get install nano -y
-COPY server.crt /etc/ssl/certs/
-COPY server.key /etc/ssl/private/
-COPY nginx.conf /etc/nginx/nginx.conf
+
+COPY ./tools/server.crt /etc/nginx/ssl/
+COPY ./tools/server.key /etc/nginx/ssl/
+COPY ./conf/nginx.conf /etc/nginx/conf.d/
+
 EXPOSE 443
+
 CMD ["nginx", "-g", "daemon off;"]
 
+#docker ps: listing containers
+#docker ps -q:listing only containers id
+
+#docker kill $(docker ps -q): killing only the runing containers
+
+#docker rm $(docker ps -qa): removing all containers ps: should be stoped
+
+#docker rmi $(docker images -q): removing all images

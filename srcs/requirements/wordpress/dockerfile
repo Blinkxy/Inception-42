@@ -1,11 +1,20 @@
-FROM debian:bullseye
+FROM debian:stable
 
-RUN apt-get install && apt-get update -y && \
-apt install php-fpm php-mysql -y && \
-apt install curl -y && apt-get install nano -y
+# Update package list and install necessary packages
+RUN apt-get update -y && \
+apt update && apt upgrade -y && \
+apt install -y php8.2-fpm php8.2 php8.2-mysql wget unzip curl && \
+sed -i "s|listen = /run/php/php8.2-fpm.sock|listen = 0.0.0.0:9000|g" /etc/php/8.2/fpm/pool.d/www.conf
 
-COPY ./wp-config.php /var/www/html/
 
-RUN chown -R www-data:www-data /var/www/html
+# Create the directory for PHP-FPM sockets
+RUN mkdir -p /run/php && chown www-data:www-data /run/php
 
-CMD ["apache2-foreground"]
+# COPY conf/www.conf /etc/php/8.2/fpm/pool.d/.
+COPY tools/script_wp.sh /script_wp.sh
+
+RUN chmod +x /script_wp.sh
+RUN mkdir -p /var/www/html
+EXPOSE 9000
+
+CMD ["sh","/script_wp.sh"]

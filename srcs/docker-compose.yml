@@ -1,41 +1,59 @@
-version: '3.8'
-
 services:
   nginx:
+    container_name: nginx
     build:
-      context: ./requirements/nginx
+      context: ./requirements/nginx/.
+    depends_on:
+      - wordpress
+    restart: always
     ports:
       - "443:443"
     volumes:
-      - /home/mzoheir/data/nginx:/etc/nginx
+      - volumeWP:/var/www/html
     networks:
       - inception_network
 
   wordpress:
+    container_name: wp-php
     build:
-      context: ./requirements/wordpress
+      context: ./requirements/wordpress/.
     depends_on:
       - mariadb
+    restart: always
     volumes:
-      - ./envwordpress/tools
+      - volumeWP:/var/www/html
     env_file:
       - .env
-    
     networks:
       - inception_network
+    expose:
+      - "9000"
 
   mariadb:
+    container_name: mariadb
     build:
-      context: ./requirements/mariadb
-    environment:
-      - dbuser = ${db_user}
-      - dbname = ${db_name}
-      - dbpw = ${db_pw}
+      context: ./requirements/mariadb/.
+    restart: always
     volumes:
-      - /home/mzoheir/data/database:/var/lib/mysql
+      - volumeMariadb:/var/lib/mysql
+    env_file:
+      - .env
     networks:
       - inception_network
+    expose:
+      - "3306"
 
+volumes:
+  volumeWP:
+    driver_opts:
+      type: none
+      device: /home/mzoheir/data/WordPressDB/
+      o: bind
+  volumeMariadb:
+    driver_opts:
+      type: none
+      device: /home/mzoheir/data/MariaDB/
+      o: bind
 networks:
   inception_network:
     driver: bridge
